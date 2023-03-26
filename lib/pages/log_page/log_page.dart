@@ -87,7 +87,29 @@ class _LogEntryState extends State<LogEntry> {
         children: [
           SlidableAction(
             onPressed: (context) {},
+            icon: Icons.message_rounded,
+            label: 'Comment',
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
+          SlidableAction(
+            onPressed: (context) {},
             icon: Icons.add,
+            label: 'Add',
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+        ],
+      ),
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (context) {},
+            icon: Icons.delete_rounded,
+            label: 'Delete',
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
           ),
         ],
       ),
