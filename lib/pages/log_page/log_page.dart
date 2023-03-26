@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'dart:math';
 
 class LogPage extends StatefulWidget {
   const LogPage({super.key});

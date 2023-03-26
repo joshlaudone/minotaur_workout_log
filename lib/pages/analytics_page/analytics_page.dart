@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:workout_log/database/database_manager.dart';
+import 'package:workout_log/database/exercise.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -10,9 +12,25 @@ class AnalyticsPage extends StatefulWidget {
 class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text("Analytics"),
+        child: FutureBuilder<List<Exercise>>(
+            future: DatabaseManager.instance.getExercises(),
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Exercise>> snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: Text('Loading'));
+              }
+              return ListView(
+                children: snapshot.data!.map((exercise) {
+                  return Center(
+                    child: ListTile(
+                      title: Text(exercise.name),
+                    ),
+                  );
+                }).toList(),
+              );
+            }),
       ),
     );
   }
