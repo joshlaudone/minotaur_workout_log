@@ -86,8 +86,28 @@ class DatabaseManager {
     return exerciseList;
   }
 
-  Future<int> add(Exercise exercise) async {
+  Future<int> addMuscleGroup(MuscleGroup muscleGroup) async {
+    Database db = await instance.database;
+    return await db.insert('muscle_group', muscleGroup.toMap());
+  }
+
+  Future<int> addExercise(Exercise exercise) async {
     Database db = await instance.database;
     return await db.insert('exercise', exercise.toMap());
+  }
+
+  Future<int> updateExercise(Exercise exercise) async {
+    Database db = await instance.database;
+    return await db.update(
+      'exercise',
+      exercise.toMap(),
+      where: 'id = ?',
+      whereArgs: [exercise.id],
+    );
+  }
+
+  Future<int> removeExercise(int id) async {
+    Database db = await instance.database;
+    return await db.delete('exercise', where: 'id = ?', whereArgs: [id]);
   }
 }
