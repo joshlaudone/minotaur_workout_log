@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'dart:math';
 
@@ -39,13 +40,6 @@ class _LogPageState extends State<LogPage> {
               Expanded(
                 child: Text(
                   "RPE",
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  "Comment",
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -123,28 +117,45 @@ class _LogEntryState extends State<LogEntry> {
             ),
           ),
           Expanded(
-            child: Text(
-              "${Random().nextInt(100) + 50} lbs",
-              textAlign: TextAlign.center,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                decoration: const InputDecoration(
+                  suffixText: "lbs",
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))
+                ],
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
           Expanded(
-            child: Text(
-              "${Random().nextInt(15) + 5} reps",
-              textAlign: TextAlign.center,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                decoration: const InputDecoration(
+                  suffixText: "reps",
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
           Expanded(
-            child: Text(
-              "${(Random().nextInt(11) + 10) / 2.0}",
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: ElevatedButton(
-              onPressed: () {},
-              child: const Icon(Icons.message_rounded),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))
+                ],
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         ],
