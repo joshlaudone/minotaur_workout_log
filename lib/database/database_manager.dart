@@ -16,7 +16,7 @@ class DatabaseManager {
   static const String databaseFile = 'minotaur_log.db';
   static const String muscleTable = 'muscle';
   static const String exerciseTable = 'exercise';
-  static const String exercise = 'exercise';
+  static const String exerciseMuscleTable = 'exerciseMuscle';
 
   Future<Database> _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
@@ -45,65 +45,64 @@ class DatabaseManager {
         increment   REAL                                     NOT NULL DEFAULT '5'
       );
     ''');
-    await db.insert(
-      'exercise',
-      Exercise(
-              name: "Squat",
-              description: "SKWAAT",
-              units: Unit.pounds,
-              increment: 5.0)
-          .toMap(),
-    );
-    await db.insert(
-      'exercise',
-      Exercise(
-              name: "Bench",
-              description: "BANCH",
-              units: Unit.pounds,
-              increment: 5.0)
-          .toMap(),
-    );
-    await db.insert(
-      'exercise',
-      Exercise(
-              name: "Deadlift",
-              description: "Diddly-do",
-              units: Unit.kilos,
-              increment: 5.0)
-          .toMap(),
-    );
+    await db.execute('''
+      CREATE TABLE $exerciseMuscleTable(
+        id         INTEGER   PRIMARY KEY,
+        muscleRole INTEGER   NOT NULL DEFAULT '1',
+        FOREIGN KEY(exercise_id) REFERENCES $exerciseTable(id),
+        FOREIGN KEY(muscle_id)   REFERENCES $muscleTable(id)
+      );
+    ''');
+    await createExercise(Exercise(
+        name: "Squat",
+        description: "SKWAAT",
+        units: Unit.pounds,
+        increment: 5.0));
+    await createExercise(Exercise(
+        name: "Bench",
+        description: "BANCH",
+        units: Unit.pounds,
+        increment: 5.0));
+    await createExercise(Exercise(
+        name: "Deadlift",
+        description: "Diddly-do",
+        units: Unit.kilos,
+        increment: 5.0));
+
+    await createMuscle(Muscle(name: "Neck"));
+    await createMuscle(Muscle(name: "Shoulders"));
+    await createMuscle(Muscle(name: "Biceps"));
+    await createMuscle(Muscle(name: "Triceps"));
+    await createMuscle(Muscle(name: "Forearms"));
+    await createMuscle(Muscle(name: "Back"));
+    await createMuscle(Muscle(name: "Chest"));
+    await createMuscle(Muscle(name: "Abs"));
+    await createMuscle(Muscle(name: "Hips"));
+    await createMuscle(Muscle(name: "Quads"));
+    await createMuscle(Muscle(name: "Hamstrings"));
+    await createMuscle(Muscle(name: "Calves"));
+    await createMuscle(Muscle(name: "Olympic"));
+    await createMuscle(Muscle(name: "Plyometric"));
+    await createMuscle(Muscle(name: "Cardio"));
+    await createMuscle(Muscle(name: "Conditioning"));
   }
 
   static Future _onConfigure(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
   }
 
-  Future<List<Muscle>> getMuscles() async {
+  Future<int> createExercise(Exercise exercise) async {
     Database db = await instance.database;
-    var muscles = await db.query(muscleTable, orderBy: 'name');
-    List<Muscle> muscleList = muscles.isNotEmpty
-        ? muscles.map((c) => Muscle.fromMap(c)).toList()
-        : [];
-    return muscleList;
+    return await db.insert(exerciseTable, exercise.toMap());
   }
 
-  Future<List<Exercise>> getExercises() async {
+  Future<List<Exercise>> readExercises() async {
     Database db = await instance.database;
     var exercises = await db.query(exerciseTable, orderBy: 'name');
     List<Exercise> exerciseList = exercises.isNotEmpty
         ? exercises.map((c) => Exercise.fromMap(c)).toList()
         : [];
     return exerciseList;
-  }
-
-  Future<int> addMuscleGroup(Muscle muscleGroup) async {
-    Database db = await instance.database;
-    return await db.insert(muscleTable, muscleGroup.toMap());
-  }
-
-  Future<int> addExercise(Exercise exercise) async {
-    Database db = await instance.database;
-    return await db.insert(exerciseTable, exercise.toMap());
   }
 
   Future<int> updateExercise(Exercise exercise) async {
@@ -116,8 +115,37 @@ class DatabaseManager {
     );
   }
 
-  Future<int> removeExercise(int id) async {
+  Future<int> deleteExercise(int id) async {
     Database db = await instance.database;
     return await db.delete(exerciseTable, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> createMuscle(Muscle muscle) async {
+    Database db = await instance.database;
+    return await db.insert(muscleTable, muscle.toMap());
+  }
+
+  Future<List<Muscle>> readMuscles() async {
+    Database db = await instance.database;
+    var muscles = await db.query(muscleTable, orderBy: 'name');
+    List<Muscle> muscleList = muscles.isNotEmpty
+        ? muscles.map((c) => Muscle.fromMap(c)).toList()
+        : [];
+    return muscleList;
+  }
+
+  Future<int> updateMuscle(Muscle muscle) async {
+    Database db = await instance.database;
+    return await db.update(
+      muscleTable,
+      muscle.toMap(),
+      where: 'id = ?',
+      whereArgs: [muscle.id],
+    );
+  }
+
+  Future<int> deleteMuscle(int id) async {
+    Database db = await instance.database;
+    return await db.delete(muscleTable, where: 'id = ?', whereArgs: [id]);
   }
 }

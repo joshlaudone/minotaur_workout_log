@@ -15,7 +15,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     return Scaffold(
       body: Center(
         child: FutureBuilder<List<Exercise>>(
-            future: DatabaseManager.instance.getExercises(),
+            future: DatabaseManager.instance.readExercises(),
             builder:
                 (BuildContext context, AsyncSnapshot<List<Exercise>> snapshot) {
               if (!snapshot.hasData) {
