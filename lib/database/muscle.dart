@@ -1,10 +1,10 @@
-class MuscleGroup {
+class Muscle {
   final int? id;
   final String name;
 
-  MuscleGroup({this.id, required this.name});
+  Muscle({this.id, required this.name});
 
-  factory MuscleGroup.fromMap(Map<String, dynamic> json) => MuscleGroup(
+  factory Muscle.fromMap(Map<String, dynamic> json) => Muscle(
         id: json['id'],
         name: json['name'],
       );
