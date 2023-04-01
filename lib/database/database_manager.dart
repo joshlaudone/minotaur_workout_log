@@ -5,7 +5,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'muscle.dart';
 import 'exercise.dart';
-import 'set.dart';
+import 'workout_set.dart';
 
 class DatabaseManager {
   DatabaseManager._privateConstructor();
@@ -19,7 +19,7 @@ class DatabaseManager {
   static const String exerciseTable = 'exercise';
   static const String exerciseMuscleTable = 'exerciseMuscle';
   static const String workoutTable = 'workout';
-  static const String setTable = 'set';
+  static const String setTable = 'workoutSet';
 
   Future<Database> _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
@@ -34,13 +34,13 @@ class DatabaseManager {
 
   Future _onCreate(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE [IF NOT EXISTS] $muscleTable(
+      CREATE TABLE $muscleTable(
         id   INTEGER                            PRIMARY KEY,
         name TEXT CHECK( LENGTH(name) <= 100 )  NOT NULL DEFAULT '' UNIQUE
       );
     ''');
     await db.execute('''
-      CREATE TABLE [IF NOT EXISTS] $exerciseTable(
+      CREATE TABLE $exerciseTable(
         id          INTEGER                                    PRIMARY KEY,
         name        TEXT CHECK( LENGTH(name) <= 100 )          NOT NULL DEFAULT '' UNIQUE,
         description TEXT CHECK( LENGTH(description) <= 1000 )  NOT NULL DEFAULT '',
@@ -49,33 +49,40 @@ class DatabaseManager {
       );
     ''');
     await db.execute('''
-      CREATE TABLE [IF NOT EXISTS] $exerciseMuscleTable(
+      CREATE TABLE $exerciseMuscleTable(
         id         INTEGER   PRIMARY KEY,
         muscleRole INTEGER   NOT NULL DEFAULT '1',
+        exerciseId INTEGER   NOT NULL,
+        muscleId   INTEGER   NOT NULL,
         FOREIGN KEY(exerciseId) REFERENCES $exerciseTable(id),
         FOREIGN KEY(muscleId)   REFERENCES $muscleTable(id),
         UNIQUE(exerciseId, muscleId)
       );
     ''');
     await db.execute('''
-      CREATE TABLE [IF NOT EXISTS] $workoutTable(
+      CREATE TABLE $workoutTable(
         id         INTEGER   PRIMARY KEY,
+        date       TEXT      NOT NULL,
+        duration   TEXT,
+        comment    TEXT
       );
     ''');
     await db.execute('''
-      CREATE TABLE [IF NOT EXISTS] $setTable(
+      CREATE TABLE $setTable(
         id  INTEGER  PRIMARY KEY,
+        workoutId   INTEGER                                 NOT NULL,
+        exerciseId  INTEGER                                 NOT NULL,
+        setNumber   INTEGER                                 NOT NULL,
+        setType     INTEGER                                 NOT NULL,
+        weight      REAL,
+        reps        INTEGER,
+        distance    INTEGER,
+        duration    TEXT,
+        restTime    TEXT,
+        rpe         REAL,
+        comment     TEXT CHECK ( LENGTH(comment) <= 1000 ),
         FOREIGN KEY(workoutId) REFERENCES $workoutTable(id),
         FOREIGN KEY(exerciseId) REFERENCES $exerciseTable(id),
-        setNumber   INTEGER                                 NOT NULL DEFAULT '',
-        setType     INTEGER                                 NOT NULL DEFAULT '',
-        weight      REAL                                    ,
-        reps        INTEGER                                 ,
-        distance    INTEGER                                 ,
-        duration    TEXT                                    ,
-        restTime    TEXT                                    ,
-        rpe         REAL                                    ,
-        comment     TEXT CHECK ( LENGTH(comment) <= 1000 )  ,
         UNIQUE(workoutId, setNumber)
       );
     ''');
@@ -175,20 +182,20 @@ class DatabaseManager {
     return await db.delete(muscleTable, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> createSet(Set set) async {
+  Future<int> createSet(WorkoutSet set) async {
     Database db = await instance.database;
     return await db.insert(setTable, set.toMap());
   }
 
-  Future<List<Set>> readSets() async {
+  Future<List<WorkoutSet>> readSets() async {
     Database db = await instance.database;
     var sets = await db.query(setTable, orderBy: 'name');
-    List<Set> setList =
-        sets.isNotEmpty ? sets.map((c) => Set.fromMap(c)).toList() : [];
+    List<WorkoutSet> setList =
+        sets.isNotEmpty ? sets.map((c) => WorkoutSet.fromMap(c)).toList() : [];
     return setList;
   }
 
-  Future<int> updateSet(Set set) async {
+  Future<int> updateSet(WorkoutSet set) async {
     Database db = await instance.database;
     return await db.update(
       setTable,
