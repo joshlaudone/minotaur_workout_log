@@ -37,10 +37,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   description: 'description',
                   units: Unit.pounds,
                   increment: 5));
+              setState(() {
+                myController.clear();
+              });
             },
             child: Text("Add to db"),
           ),
-          Center(
+          Expanded(
             child: FutureBuilder<List<Exercise>>(
               future: DatabaseManager.instance.readExercises(),
               builder: (BuildContext context,
@@ -48,15 +51,18 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 if (!snapshot.hasData) {
                   return const Center(child: Text('Loading'));
                 }
-                return ListView(
-                  children: snapshot.data!.map((exercise) {
-                    return Center(
-                      child: ListTile(
-                        title: Text(exercise.name),
-                      ),
-                    );
-                  }).toList(),
-                );
+                return snapshot.data!.isEmpty
+                    ? const Center(child: Text('No exercises in db'))
+                    // : Center(child: Text(snapshot.data!.length.toString()));
+                    : ListView(
+                        children: snapshot.data!.map((exercise) {
+                          return Center(
+                            child: ListTile(
+                              title: Text(exercise.name),
+                            ),
+                          );
+                        }).toList(),
+                      );
               },
             ),
           ),
