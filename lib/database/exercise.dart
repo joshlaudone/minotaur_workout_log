@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 enum Unit { pounds, kilos }
 
 class Exercise {
