@@ -86,42 +86,50 @@ class DatabaseManager {
         UNIQUE(workoutId, setNumber)
       );
     ''');
-    await createExercise(Exercise(
-        name: "Squat",
-        description: "SKWAAT",
-        units: Unit.pounds,
-        increment: 5.0));
-    await createExercise(Exercise(
-        name: "Bench",
-        description: "BANCH",
-        units: Unit.pounds,
-        increment: 5.0));
-    await createExercise(Exercise(
-        name: "Deadlift",
-        description: "Diddly-do",
-        units: Unit.kilos,
-        increment: 5.0));
-
-    await createMuscle(Muscle(name: "Neck"));
-    await createMuscle(Muscle(name: "Shoulders"));
-    await createMuscle(Muscle(name: "Biceps"));
-    await createMuscle(Muscle(name: "Triceps"));
-    await createMuscle(Muscle(name: "Forearms"));
-    await createMuscle(Muscle(name: "Back"));
-    await createMuscle(Muscle(name: "Chest"));
-    await createMuscle(Muscle(name: "Abs"));
-    await createMuscle(Muscle(name: "Hips"));
-    await createMuscle(Muscle(name: "Quads"));
-    await createMuscle(Muscle(name: "Hamstrings"));
-    await createMuscle(Muscle(name: "Calves"));
-    await createMuscle(Muscle(name: "Olympic"));
-    await createMuscle(Muscle(name: "Plyometric"));
-    await createMuscle(Muscle(name: "Cardio"));
-    await createMuscle(Muscle(name: "Conditioning"));
   }
 
   static Future _onConfigure(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
+  }
+
+  Future<bool> initializeDatabase() async {
+    List<Exercise> exerciseList = await readExercises();
+    if (exerciseList.isEmpty) {
+      await createExercise(Exercise(
+          name: "Squat",
+          description: "SKWAAT",
+          units: Unit.pounds,
+          increment: 5.0));
+      await createExercise(Exercise(
+          name: "Bench",
+          description: "BANCH",
+          units: Unit.pounds,
+          increment: 5.0));
+      await createExercise(Exercise(
+          name: "Deadlift",
+          description: "Diddly-do",
+          units: Unit.kilos,
+          increment: 5.0));
+
+      await createMuscle(Muscle(name: "Neck"));
+      await createMuscle(Muscle(name: "Shoulders"));
+      await createMuscle(Muscle(name: "Biceps"));
+      await createMuscle(Muscle(name: "Triceps"));
+      await createMuscle(Muscle(name: "Forearms"));
+      await createMuscle(Muscle(name: "Back"));
+      await createMuscle(Muscle(name: "Chest"));
+      await createMuscle(Muscle(name: "Abs"));
+      await createMuscle(Muscle(name: "Hips"));
+      await createMuscle(Muscle(name: "Quads"));
+      await createMuscle(Muscle(name: "Hamstrings"));
+      await createMuscle(Muscle(name: "Calves"));
+      await createMuscle(Muscle(name: "Olympic"));
+      await createMuscle(Muscle(name: "Plyometric"));
+      await createMuscle(Muscle(name: "Cardio"));
+      await createMuscle(Muscle(name: "Conditioning"));
+      return true;
+    }
+    return false;
   }
 
   Future<int> createExercise(Exercise exercise) async {

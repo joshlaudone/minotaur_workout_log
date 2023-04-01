@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:workout_log/database/database_manager.dart';
 import 'pages/screens.dart';
 
 void main() {
@@ -46,6 +47,12 @@ class _MainPageState extends State<MainPage> {
     const AnalyticsPage(),
     const SettingsPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    DatabaseManager.instance.initializeDatabase();
+  }
 
   @override
   Widget build(BuildContext context) {
