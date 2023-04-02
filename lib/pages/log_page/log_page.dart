@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'package:workout_log/database/database_manager.dart';
 import 'package:workout_log/database/session.dart';
@@ -47,26 +48,7 @@ class _LogPageState extends State<LogPage> {
               ),
             ],
           ),
-          Expanded(
-            child: FutureBuilder<List<WorkoutSet>>(
-              future: DatabaseManager.instance.readSets(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<WorkoutSet>> snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: Text('Loading'));
-                }
-                return snapshot.data!.isEmpty
-                    ? const Center(child: Text('No sets in this workout'))
-                    // : Center(child: Text(snapshot.data!.length.toString()));
-                    : ListView(
-                        padding: const EdgeInsets.only(bottom: 200.0),
-                        children: snapshot.data!.map((workoutSet) {
-                          return LogEntry(workoutSet: workoutSet);
-                        }).toList(),
-                      );
-              },
-            ),
-          ),
+          Expanded(child: scrollableLog(context)),
         ],
       ),
       floatingActionButton: Theme(
@@ -84,6 +66,66 @@ class _LogPageState extends State<LogPage> {
           child: const Icon(Icons.add),
         ),
       ),
+    );
+  }
+
+  Widget scrollableLog(BuildContext context) {
+    return FutureBuilder<List<WorkoutSet>>(
+      future: DatabaseManager.instance.readSets(),
+      builder:
+          (BuildContext context, AsyncSnapshot<List<WorkoutSet>> snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: Text('Loading'));
+        }
+        return snapshot.data!.isEmpty
+            ? const Center(child: Text('No sets in this workout'))
+            // : Center(child: Text(snapshot.data!.length.toString()));
+            : ListView.builder(
+                itemCount: snapshot.data!.length,
+                padding: const EdgeInsets.only(bottom: 200.0),
+                itemBuilder: (context, index) {
+                  WorkoutSet workoutSet = snapshot.data!.elementAt(index);
+                  return Slidable(
+                    key: Key(index.toString()),
+                    startActionPane: ActionPane(
+                      motion: const ScrollMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) {},
+                          icon: Icons.message_rounded,
+                          label: 'Comment',
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
+                        SlidableAction(
+                          onPressed: (context) {},
+                          icon: Icons.add,
+                          label: 'Add',
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                        ),
+                      ],
+                    ),
+                    endActionPane: ActionPane(
+                      motion: const ScrollMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) {
+                            DatabaseManager.instance.deleteSet(workoutSet.id!);
+                            setState(() {});
+                          },
+                          icon: Icons.delete_rounded,
+                          label: 'Delete',
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                      ],
+                    ),
+                    child: LogEntry(workoutSet: workoutSet),
+                  );
+                },
+              );
+      },
     );
   }
 }
