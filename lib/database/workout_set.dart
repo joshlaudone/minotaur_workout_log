@@ -1,24 +1,24 @@
 enum SetType { warmup, normal, half, drop, amrap }
 
 class WorkoutSet {
-  final int? id;
-  final int workoutId;
-  final int exerciseId;
-  final int setNumber;
-  final SetType setType;
-  final double? weight;
-  final int? reps;
-  final int? distance;
-  final Duration? duration;
-  final Duration? restTime;
-  final int? rpe;
-  final String? comment;
+  int? id;
+  int sessionId;
+  int exerciseId;
+  int? setNumber;
+  SetType setType;
+  double? weight;
+  int? reps;
+  int? distance;
+  Duration? duration;
+  Duration? restTime;
+  double? rpe;
+  String? comment;
 
   WorkoutSet({
     this.id,
-    required this.workoutId,
+    required this.sessionId,
     required this.exerciseId,
-    required this.setNumber,
+    this.setNumber,
     required this.setType,
     this.weight,
     this.reps,
@@ -31,7 +31,7 @@ class WorkoutSet {
 
   factory WorkoutSet.fromMap(Map<String, dynamic> json) => WorkoutSet(
         id: json['id'],
-        workoutId: json['workoutId'],
+        sessionId: json['sessionId'],
         exerciseId: json['exerciseId'],
         setNumber: json['setNumber'],
         setType: SetType.values[json['setType']],
@@ -47,7 +47,7 @@ class WorkoutSet {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'workoutId': workoutId,
+      'sessionId': sessionId,
       'exerciseId': exerciseId,
       'setNumber': setNumber,
       'setType': setType.index,

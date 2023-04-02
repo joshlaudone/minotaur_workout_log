@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'muscle.dart';
 import 'exercise.dart';
 import 'workout_set.dart';
+import 'session.dart';
 
 class DatabaseManager {
   DatabaseManager._privateConstructor();
@@ -18,7 +19,7 @@ class DatabaseManager {
   static const String muscleTable = 'muscle';
   static const String exerciseTable = 'exercise';
   static const String exerciseMuscleTable = 'exerciseMuscle';
-  static const String workoutTable = 'workout';
+  static const String sessionTable = 'session';
   static const String setTable = 'workoutSet';
 
   Future<Database> _initDatabase() async {
@@ -60,7 +61,7 @@ class DatabaseManager {
       );
     ''');
     await db.execute('''
-      CREATE TABLE $workoutTable(
+      CREATE TABLE $sessionTable(
         id         INTEGER   PRIMARY KEY,
         date       TEXT      NOT NULL,
         duration   TEXT,
@@ -70,7 +71,7 @@ class DatabaseManager {
     await db.execute('''
       CREATE TABLE $setTable(
         id  INTEGER  PRIMARY KEY,
-        workoutId   INTEGER                                 NOT NULL,
+        sessionId   INTEGER                                 NOT NULL,
         exerciseId  INTEGER                                 NOT NULL,
         setNumber   INTEGER                                 NOT NULL,
         setType     INTEGER                                 NOT NULL,
@@ -81,11 +82,11 @@ class DatabaseManager {
         restTime    TEXT,
         rpe         REAL,
         comment     TEXT CHECK ( LENGTH(comment) <= 1000 ),
-        FOREIGN KEY(workoutId) REFERENCES $workoutTable(id),
-        FOREIGN KEY(exerciseId) REFERENCES $exerciseTable(id),
-        UNIQUE(workoutId, setNumber)
+        UNIQUE(sessionId, setNumber)
       );
     ''');
+    //FOREIGN KEY(sessionId) REFERENCES $sessionTable(id),
+    //FOREIGN KEY(exerciseId) REFERENCES $exerciseTable(id),
   }
 
   static Future _onConfigure(Database db) async {
@@ -127,6 +128,8 @@ class DatabaseManager {
       await createMuscle(Muscle(name: "Plyometric"));
       await createMuscle(Muscle(name: "Cardio"));
       await createMuscle(Muscle(name: "Conditioning"));
+
+      //await createSession(Session(name: 'test'));
       return true;
     }
     return false;
@@ -192,12 +195,17 @@ class DatabaseManager {
 
   Future<int> createSet(WorkoutSet set) async {
     Database db = await instance.database;
+    if (set.setNumber == null) {
+      var sets = await db.query(setTable);
+      // TODO make this only grab for the session when that's implemented
+      set.setNumber = sets.length;
+    }
     return await db.insert(setTable, set.toMap());
   }
 
   Future<List<WorkoutSet>> readSets() async {
     Database db = await instance.database;
-    var sets = await db.query(setTable, orderBy: 'name');
+    var sets = await db.query(setTable, orderBy: 'id');
     List<WorkoutSet> setList =
         sets.isNotEmpty ? sets.map((c) => WorkoutSet.fromMap(c)).toList() : [];
     return setList;
@@ -216,5 +224,34 @@ class DatabaseManager {
   Future<int> deleteSet(int id) async {
     Database db = await instance.database;
     return await db.delete(setTable, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> createSession(Session session) async {
+    Database db = await instance.database;
+    return await db.insert(sessionTable, session.toMap());
+  }
+
+  Future<List<Session>> readSessions() async {
+    Database db = await instance.database;
+    var sessions = await db.query(sessionTable, orderBy: 'id');
+    List<Session> sessionList = sessions.isNotEmpty
+        ? sessions.map((c) => Session.fromMap(c)).toList()
+        : [];
+    return sessionList;
+  }
+
+  Future<int> updateSession(Session session) async {
+    Database db = await instance.database;
+    return await db.update(
+      sessionTable,
+      session.toMap(),
+      where: 'id = ?',
+      whereArgs: [session.id],
+    );
+  }
+
+  Future<int> deleteSession(int id) async {
+    Database db = await instance.database;
+    return await db.delete(sessionTable, where: 'id = ?', whereArgs: [id]);
   }
 }

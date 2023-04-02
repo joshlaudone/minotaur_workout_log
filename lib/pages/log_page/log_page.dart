@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+
+import 'package:workout_log/database/database_manager.dart';
+import 'package:workout_log/database/session.dart';
+import 'package:workout_log/database/workout_set.dart';
+import 'package:workout_log/pages/log_page/log_entry.dart';
 
 class LogPage extends StatefulWidget {
   const LogPage({super.key});
@@ -45,120 +48,40 @@ class _LogPageState extends State<LogPage> {
             ],
           ),
           Expanded(
-            child: ListView.builder(itemBuilder: (_, index) {
-              return LogEntry(entryId: index);
-            }),
+            child: FutureBuilder<List<WorkoutSet>>(
+              future: DatabaseManager.instance.readSets(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<WorkoutSet>> snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: Text('Loading'));
+                }
+                return snapshot.data!.isEmpty
+                    ? const Center(child: Text('No sets in this workout'))
+                    // : Center(child: Text(snapshot.data!.length.toString()));
+                    : ListView(
+                        padding: const EdgeInsets.only(bottom: 200.0),
+                        children: snapshot.data!.map((workoutSet) {
+                          return LogEntry(workoutSet: workoutSet);
+                        }).toList(),
+                      );
+              },
+            ),
           ),
         ],
       ),
       floatingActionButton: Theme(
         data: Theme.of(context),
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () async {
+            await DatabaseManager.instance.createSet(WorkoutSet(
+              sessionId: 1,
+              exerciseId: 1,
+              setType: SetType.normal,
+            ));
+            setState(() {});
+          },
           backgroundColor: Theme.of(context).primaryColor,
           child: const Icon(Icons.add),
-        ),
-      ),
-    );
-  }
-}
-
-class LogEntry extends StatefulWidget {
-  final int entryId;
-  const LogEntry({super.key, required this.entryId});
-
-  @override
-  State<LogEntry> createState() => _LogEntryState();
-}
-
-class _LogEntryState extends State<LogEntry> {
-  @override
-  Widget build(BuildContext context) {
-    return Slidable(
-      startActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            onPressed: (context) {},
-            icon: Icons.message_rounded,
-            label: 'Comment',
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-          ),
-          SlidableAction(
-            onPressed: (context) {},
-            icon: Icons.add,
-            label: 'Add',
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-          ),
-        ],
-      ),
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            onPressed: (context) {},
-            icon: Icons.delete_rounded,
-            label: 'Delete',
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-          ),
-        ],
-      ),
-      child: Card(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Expanded(
-              child: Text(
-                "${widget.entryId + 1}",
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  decoration: const InputDecoration(
-                    suffixText: "lbs",
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))
-                  ],
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  decoration: const InputDecoration(
-                    suffixText: "reps",
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly
-                  ],
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))
-                  ],
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
