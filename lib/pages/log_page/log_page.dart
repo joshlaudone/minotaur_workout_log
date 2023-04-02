@@ -14,6 +14,12 @@ class LogPage extends StatefulWidget {
 }
 
 class _LogPageState extends State<LogPage> {
+  Future<List<WorkoutSet>> currentSets = DatabaseManager.instance.readSets();
+
+  void refreshSets() {
+    currentSets = DatabaseManager.instance.readSets();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +66,9 @@ class _LogPageState extends State<LogPage> {
               exerciseId: 1,
               setType: SetType.normal,
             ));
-            setState(() {});
+            setState(() {
+              refreshSets();
+            });
           },
           backgroundColor: Theme.of(context).primaryColor,
           child: const Icon(Icons.add),
@@ -71,7 +79,7 @@ class _LogPageState extends State<LogPage> {
 
   Widget scrollableLog(BuildContext context) {
     return FutureBuilder<List<WorkoutSet>>(
-      future: DatabaseManager.instance.readSets(),
+      future: currentSets,
       builder:
           (BuildContext context, AsyncSnapshot<List<WorkoutSet>> snapshot) {
         if (!snapshot.hasData) {
@@ -112,7 +120,9 @@ class _LogPageState extends State<LogPage> {
                         SlidableAction(
                           onPressed: (context) {
                             DatabaseManager.instance.deleteSet(workoutSet.id!);
-                            setState(() {});
+                            setState(() {
+                              refreshSets();
+                            });
                           },
                           icon: Icons.delete_rounded,
                           label: 'Delete',
